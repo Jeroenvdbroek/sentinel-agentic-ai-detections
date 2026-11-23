@@ -1,0 +1,1207 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "The ThreatDefence agentic AI attack framework analytics rules for Microsoft Sentinel / Defender."
+  },
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Sentinel Log Analytics workspace (in the resource group you deploy to)."
+      }
+    },
+    "rulePrefix": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional text put in front of every rule name, e.g. 'CONTOSO - '."
+      }
+    },
+    "rulesEnabled": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the rules switched on. Default off: baseline them on your own data first, as ThreatDefence advises."
+      }
+    },
+    "sourceAADNonInteractiveUserSignInLogs": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Rules also read AADNonInteractiveUserSignInLogs where they support it. Set to true only if this table exists in your workspace."
+      }
+    },
+    "sourceDeviceRegistryEvents": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Rules also read DeviceRegistryEvents where they support it. Set to true only if this table exists in your workspace."
+      }
+    },
+    "sourceDnsEvents": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Rules also read DnsEvents where they support it. Set to true only if this table exists in your workspace."
+      }
+    },
+    "sourceMicrosoftGraphActivityLogs": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Rules also read MicrosoftGraphActivityLogs where they support it. Set to true only if this table exists in your workspace."
+      }
+    },
+    "sourceW3CIISLog": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Rules also read W3CIISLog where they support it. Set to true only if this table exists in your workspace."
+      }
+    },
+    "sourceAWSCloudTrail": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Rules also read AWSCloudTrail where they support it. Set to true only if this table exists in your workspace."
+      }
+    },
+    "deployCodingAgentBypassModeSpawnsAttackTools": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: AI agent CLI starts attack tools"
+      }
+    },
+    "deployConfigBackupFileServed": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy: Configuration or backup file served to an external address during probing (needs W3CIISLog)"
+      }
+    },
+    "deployArtexAgentShellOnHost": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: ARTEX agent shell or recording proxy credential on a host"
+      }
+    },
+    "deployArtexCloudwatchSecretSearch": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy: CloudWatch logs searched for secrets (needs AWSCloudTrail)"
+      }
+    },
+    "deployArtexEc2DryrunBurst": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy: Burst of EC2 DryRun permission tests (needs AWSCloudTrail)"
+      }
+    },
+    "deployArtexFixedRhythmPasswordSpray": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: Password spray at a fixed one-second rhythm"
+      }
+    },
+    "deployArtexNormaOrUpdateCheckUserAgent": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: ARTEX code-default user agents (norma WebFetch, update check)"
+      }
+    },
+    "deployArtexServicePrincipalSelfRoleAssignment": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: Service principal assigned a role by itself"
+      }
+    },
+    "deployArtexUserAgentAnySource": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: ARTEX agentic attack framework user agent"
+      }
+    },
+    "deployCairnCampaignInfrastructure": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: Traffic to or from published Cairn campaign infrastructure"
+      }
+    },
+    "deployCairnHostArtifacts": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: Cairn dispatcher, server or worker artifacts on a host"
+      }
+    },
+    "deployCyberstrikeaiImplantPersistence": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: CyberStrikeAI implant persistence"
+      }
+    },
+    "deployCyberstrikeaiWebshellManagerOrOsProbe": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: CyberStrikeAI webshell manager or OS probe"
+      }
+    },
+    "deployCarbonatoDockerApiHostEscape": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: Carbonato Docker worm host escape or persistence"
+      }
+    },
+    "deployHermesYoloJailbreakOrAttackPersona": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: Hermes Agent set up for attack (approvals off, jailbreak skill or attack persona)"
+      }
+    },
+    "deployHexstrikeServerOnHost": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: HexStrike tool server or MCP client on a host"
+      }
+    },
+    "deployHexstrikeUserAgentOrXssProbe": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: HexStrike user agent or cross-site scripting probe"
+      }
+    },
+    "deployPentagiAgentCommandWrapper": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: PentAGI agent command wrapper on a host"
+      }
+    },
+    "deployPentagiUpdateCheckFromYourNetwork": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: PentAGI update check from your network"
+      }
+    },
+    "deployStrixOnHostOrTelemetry": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy: Strix AI pentest agent on a host or reporting from your network"
+      }
+    }
+  },
+  "variables": {
+    "q_CodingAgentBypassModeSpawnsAttackTools_0": "let AttackTools = dynamic([\"nmap\", \"naabu\", \"masscan\", \"nuclei\", \"katana\", \"dalfox\", \"ffuf\", \"gobuster\", \"feroxbuster\",\n    \"dirsearch\", \"nikto\", \"sqlmap\", \"wpscan\", \"hydra\", \"medusa\", \"kerbrute\", \"netexec\", \"nxc\", \"crackmapexec\",\n    \"bloodyad\", \"coercer\", \"enum4linux-ng\", \"chisel\", \"pwncat\", \"pwncat-cs\", \"evil-winrm\", \"responder\",\n    \"cloudfox\", \"msfconsole\", \"searchsploit\", \"hashcat\"]);\nlet AgentBinaries = dynamic([\"claude\", \"codex\", \"qwen\", \"kimi\", \"opencode\", \"hermes\"]);\nlet AgentCommandLine = @'(?i)(@anthropic-ai[/\\\\]claude-code|@qwen-code[/\\\\]|@openai[/\\\\]codex|kimi[-_]cli|opencode-ai|(^\"?|[/\\\\])(claude|codex|qwen|kimi|opencode)(\\.exe|\\.cmd|\\.js)?\"?(\\s|$)|--provider cairn|model_provider=\"cairn\"|/tmp/cairn-pi/)';\nlet AutoApproveFlag = @'(--dangerously-skip-permissions|--dangerously-bypass-approvals-and-sandbox|\\s--yolo\\b|\\s--auto-approve\\b|--approval-mode[\\s=]+yolo)';\nlet ScriptTool = @'(?i)/(sqlmap|nikto|wpscan|netexec|nxc|crackmapexec|bloodyad|coercer|evil-winrm|msfconsole|dirsearch|enum4linux-ng|pwncat|pwncat-cs|responder)(\\s|$)|[/\\\\ ]((sqlmap|bloodyad|dirsearch|enum4linux-ng)\\.py|nikto\\.pl)|(^|[/\\\\ ])(coercer[/\\\\]coercer|responder[/\\\\]responder)\\.py';\nlet Tools = DeviceProcessEvents\n    | where TimeGenerated > ago(1h)\n    | extend Tool = replace_string(tolower(FileName), \".exe\", \"\")\n    | extend ScriptName = iff(FileName matches regex @'(?i)^(python|ruby|perl)', tolower(extract(ScriptTool, 0, ProcessCommandLine)), \"\")\n    | where Tool in (AttackTools) or isnotempty(ScriptName) or ProcessCommandLine has_any (\"impacket-\", \"ysoserial\", \"jwt_tool\", \"PayloadsAllTheThings\", \"/home/kali/pocs/\")\n    | extend Tool = iff(isnotempty(ScriptName), trim(@'[/\\\\\\s]+', ScriptName), Tool);\nlet ByTree = Tools\n    | extend Via = case(\n        InitiatingProcessCommandLine contains \"shell-snapshots\" or InitiatingProcessCommandLine contains \"CLAUDE_CODE_SHELL_LAUNCHER_SCRIPT\", \"Claude Code shell is the parent\",\n        replace_string(tolower(InitiatingProcessFileName), \".exe\", \"\") in (AgentBinaries), strcat(InitiatingProcessFileName, \" is the parent\"),\n        replace_string(tolower(InitiatingProcessParentFileName), \".exe\", \"\") in (AgentBinaries), strcat(InitiatingProcessParentFileName, \" is the grandparent\"),\n        \"\")\n    | where isnotempty(Via)\n    | extend AgentCmd = InitiatingProcessCommandLine;\nlet Agents = DeviceProcessEvents\n    | where TimeGenerated > ago(1d)\n    | where ProcessCommandLine matches regex AgentCommandLine\n    | project DeviceId, AgentPid=ProcessId, AgentTime=TimeGenerated, AgentCmd=ProcessCommandLine;\nlet ByAgentProcess = Tools\n    | join kind=inner Agents on DeviceId\n    | where TimeGenerated between (AgentTime .. (AgentTime + 7d)) and (InitiatingProcessParentId == AgentPid or InitiatingProcessId == AgentPid)\n    | summarize arg_max(AgentTime, AgentCmd) by DeviceId, DeviceName, AccountName, TimeGenerated, FileName, Tool, ProcessCommandLine, ProcessId\n    | extend Via = \"agent found by its command line\";\nunion ByTree, ByAgentProcess\n| summarize Tools=make_set(Tool, 20), Commands=make_set(substring(ProcessCommandLine, 0, 200), 15),\n    FirstTool=min(TimeGenerated), LastTool=max(TimeGenerated), Via=make_set(Via, 5), AgentCmds=make_set(substring(AgentCmd, 0, 300), 5)\n    by DeviceName, AccountName\n| extend AutoApprove = tostring(AgentCmds) matches regex AutoApproveFlag, CairnMarker = tostring(AgentCmds) contains \"cairn\"\n",
+    "n_CodingAgentBypassModeSpawnsAttackTools": "AI agent CLI starts attack tools",
+    "q_ConfigBackupFileServed_0": "let BackupPath = @\"(?i)(/\\.git/(HEAD|config)|/\\.env(\\.bak|\\.old|\\.backup|\\.local)?$|/\\.svn/|backup\\.(zip|tar|tar\\.gz|sql)|db_back|database\\.sql|dump\\.sql|wp-config\\.php\\.(bak|old|save))\";\nW3CIISLog\n| where not(ipv4_is_private(cIP)) and csUriStem matches regex BackupPath\n| summarize Requests=count(), Served=countif(scStatus in (\"200\", \"206\")), Paths=dcount(csUriStem), Sample=make_set(csUriStem, 10) by cIP, csHost\n| where Served > 0 and Paths >= 3\n",
+    "n_ConfigBackupFileServed": "Configuration or backup file served to an external address during probing",
+    "q_ArtexAgentShellOnHost_0": "DeviceProcessEvents\n| where FolderPath contains \"/artex-exec-\" or InitiatingProcessFolderPath contains \"/artex-exec-\"\n    or ProcessCommandLine contains \"__artex-exec-drop\" or ProcessCommandLine contains \"artex-pace:artex-pace\"\n    or InitiatingProcessCommandLine contains \"__artex-exec-drop\" or InitiatingProcessCommandLine contains \"artex-pace:artex-pace\"\n| summarize Events=count(), Commands=make_set(ProcessCommandLine, 20), Accounts=make_set(AccountName, 5),\n    Parents=make_set(InitiatingProcessFolderPath, 5), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated)\n    by DeviceName, DeviceId\n",
+    "n_ArtexAgentShellOnHost": "ARTEX agent shell or recording proxy credential on a host",
+    "q_ArtexCloudwatchSecretSearch_0": "AWSCloudTrail\n| where EventSource == \"logs.amazonaws.com\" and EventName == \"FilterLogEvents\"\n| extend Pattern = tostring(parse_json(RequestParameters).filterPattern), Limit = toint(parse_json(RequestParameters).limit)\n| where Pattern has_any (\"password\", \"AKIA\", \"secret\", \"token\") or Limit == 1000\n| summarize Calls=count(), LogGroups=dcount(tostring(parse_json(RequestParameters).logGroupName)), Patterns=make_set(Pattern, 10), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated) by UserIdentityArn, SourceIpAddress, UserAgent\n",
+    "n_ArtexCloudwatchSecretSearch": "CloudWatch logs searched for secrets",
+    "q_ArtexEc2DryrunBurst_0": "AWSCloudTrail\n| where EventSource == \"ec2.amazonaws.com\" and ErrorCode == \"Client.DryRunOperation\"\n| summarize DryRuns=count(), Actions=dcount(EventName), ActionList=make_set(EventName, 30), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated) by UserIdentityArn, SourceIpAddress, UserAgent, bin(TimeGenerated, 5m)\n| where DryRuns >= 10\n",
+    "n_ArtexEc2DryrunBurst": "Burst of EC2 DryRun permission tests",
+    "q_ArtexFixedRhythmPasswordSpray_0": "union isfuzzy=true SigninLogs",
+    "q_ArtexFixedRhythmPasswordSpray_1": ", AADNonInteractiveUserSignInLogs",
+    "q_ArtexFixedRhythmPasswordSpray_2": "\n| where ResultType != \"0\"\n| project TimeGenerated, IPAddress, UserAgent, UserPrincipalName, ResultType\n| sort by IPAddress asc, UserAgent asc, TimeGenerated asc\n| extend GapSec = iff(IPAddress == prev(IPAddress) and UserAgent == prev(UserAgent), datetime_diff('second', TimeGenerated, prev(TimeGenerated)), long(null))\n| summarize Attempts=count(), Users=dcount(UserPrincipalName), MedianGapSec=percentile(GapSec, 50), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated) by IPAddress, UserAgent\n| where Attempts >= 200 and Users >= 20 and MedianGapSec <= 2\n",
+    "n_ArtexFixedRhythmPasswordSpray": "Password spray at a fixed one-second rhythm",
+    "q_ArtexNormaOrUpdateCheckUserAgent_0": "let CodeUA = dynamic([\"norma/0.4\", \"artex-update-check\"]);\nlet StaticExt = dynamic([\".js\", \".css\", \".map\", \".png\", \".jpg\", \".gif\", \".svg\", \".ico\", \".woff\", \".woff2\", \".ttf\"]);\nunion isfuzzy=true\n    (SigninLogs | where UserAgent in (CodeUA) | project TimeGenerated, Source=\"SigninLogs\", Account=UserPrincipalName, IPAddress, UserAgent, Target=AppDisplayName, Method=\"\", Url=\"\")",
+    "q_ArtexNormaOrUpdateCheckUserAgent_1": ",\n    (AADNonInteractiveUserSignInLogs | where UserAgent in (CodeUA) | project TimeGenerated, Source=\"AADNonInteractiveUserSignInLogs\", Account=UserPrincipalName, IPAddress, UserAgent, Target=AppDisplayName, Method=\"\", Url=\"\")",
+    "q_ArtexNormaOrUpdateCheckUserAgent_2": ",\n    (MicrosoftGraphActivityLogs | where UserAgent in (CodeUA) | project TimeGenerated, Source=\"MicrosoftGraphActivityLogs\", Account=coalesce(UserId, ServicePrincipalId, AppId), IPAddress, UserAgent, Target=\"Microsoft Graph\", Method=RequestMethod, Url=RequestUri)",
+    "q_ArtexNormaOrUpdateCheckUserAgent_3": ",\n    ",
+    "q_ArtexNormaOrUpdateCheckUserAgent_4": "(CommonSecurityLog | where RequestClientApplication in (CodeUA) | project TimeGenerated, Source=\"CommonSecurityLog\", Account=SourceUserName, IPAddress=SourceIP, UserAgent=RequestClientApplication, Target=DestinationHostName, Method=RequestMethod, Url=RequestURL)",
+    "q_ArtexNormaOrUpdateCheckUserAgent_5": ",\n    (W3CIISLog | where csUserAgent in (CodeUA) | project TimeGenerated, Source=\"W3CIISLog\", Account=csUserName, IPAddress=cIP, UserAgent=csUserAgent, Target=csHost, Method=csMethod, Url=csUriStem)",
+    "q_ArtexNormaOrUpdateCheckUserAgent_6": "\n| extend Path = tolower(tostring(split(Url, \"?\")[0]))\n| summarize Events=count(), NonGet=countif(isnotempty(Method) and Method != \"GET\"), StaticHits=countif(Path has_any (StaticExt)),\n    Targets=make_set(Target, 10), SampleURLs=make_set(Url, 10), Sources=make_set(Source),\n    FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated) by Account, IPAddress, UserAgent\n| where UserAgent == \"artex-update-check\" or (NonGet == 0 and StaticHits == 0)\n",
+    "n_ArtexNormaOrUpdateCheckUserAgent": "ARTEX code-default user agents (norma WebFetch, update check)",
+    "q_ArtexServicePrincipalSelfRoleAssignment_0": "AuditLogs\n| where OperationName in (\"Add member to role\", \"Add app role assignment to service principal\", \"Add app role assignment grant to user\")\n| extend InitiatorId = tostring(InitiatedBy.app.servicePrincipalId), InitiatorName = tostring(InitiatedBy.app.displayName)\n| where isnotempty(InitiatorId)\n| mv-expand Target = TargetResources\n| extend TargetId = tostring(Target.id), TargetName = tostring(Target.displayName)\n| where TargetId == InitiatorId\n| project TimeGenerated, OperationName, InitiatorName, InitiatorId, TargetName, Result, CorrelationId\n",
+    "n_ArtexServicePrincipalSelfRoleAssignment": "Service principal assigned a role by itself",
+    "q_ArtexUserAgentAnySource_0": "let ArtexUA = dynamic([\"artex-readonly/\",\"artex-pentest/\",\"artex-audit/\",\"artex-verify/\",\"artex-spawn/\",\"ARTEX-worker/\",\"artex-enrich/\",\"artex-i21861-canary\",\"artex-agent\",\"artex-judge-\",\"ARTeX-authorized-pentest\",\"Mozilla/5.0 ARTeX\",\"Mozilla/5.0 (ARTEX)\",\"ArtExVerify/\",\"ArtEx/1.0\",\"scopeweaver\",\"spa-api-recon\"]);\nunion isfuzzy=true\n    (SigninLogs | where UserAgent has_any (ArtexUA) | project TimeGenerated, Source=\"SigninLogs\", Account=UserPrincipalName, IPAddress, UserAgent)",
+    "q_ArtexUserAgentAnySource_1": ",\n    (AADNonInteractiveUserSignInLogs | where UserAgent has_any (ArtexUA) | project TimeGenerated, Source=\"AADNonInteractiveUserSignInLogs\", Account=UserPrincipalName, IPAddress, UserAgent)",
+    "q_ArtexUserAgentAnySource_2": ",\n    (AWSCloudTrail | where UserAgent has_any (ArtexUA) | project TimeGenerated, Source=\"AWSCloudTrail\", Account=UserIdentityArn, IPAddress=SourceIpAddress, UserAgent)",
+    "q_ArtexUserAgentAnySource_3": ",\n    ",
+    "q_ArtexUserAgentAnySource_4": "(CommonSecurityLog | where RequestClientApplication has_any (ArtexUA) | project TimeGenerated, Source=\"CommonSecurityLog\", Account=SourceUserName, IPAddress=SourceIP, UserAgent=RequestClientApplication)",
+    "q_ArtexUserAgentAnySource_5": ",\n    (MicrosoftGraphActivityLogs | where UserAgent has_any (ArtexUA) | project TimeGenerated, Source=\"MicrosoftGraphActivityLogs\", Account=coalesce(UserId, ServicePrincipalId, AppId), IPAddress=IPAddress, UserAgent)",
+    "q_ArtexUserAgentAnySource_6": "\n| summarize Events=count(), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated), Sources=make_set(Source) by Account, IPAddress, UserAgent\n",
+    "n_ArtexUserAgentAnySource": "ARTEX agentic attack framework user agent",
+    "q_CairnCampaignInfrastructure_0": "let CairnIPs = dynamic([\"199.247.25.25\", \"199.247.27.2\", \"31.59.92.155\", \"31.56.206.187\", \"38.244.50.120\", \"46.8.227.73\", \"64.44.24.195\", \"94.183.184.98\", \"94.183.184.254\", \"95.182.99.112\", \"176.65.144.71\", \"155.254.22.215\", \"209.126.4.170\", \"213.21.239.62\", \"172.245.224.188\", \"172.245.89.137\"]);\nlet CairnDomains = dynamic([\"medbooksource.com\", \"traffic-analyzer.net\", \"b8t.shop\", \"cdn.netlfjs.com\", \"x1opay.co\", \"static-js.com\", \"cdn.js-static.com\", \"js-static.com\", \"jsnetlify.com\", \"netlifyjs.com\", \"newssjs.com\"]);\nunion isfuzzy=true\n    (CommonSecurityLog | where SourceIP in (CairnIPs) or DestinationIP in (CairnIPs) or DestinationHostName has_any (CairnDomains)\n        | project TimeGenerated, Source=\"CommonSecurityLog\", Indicator=coalesce(DestinationHostName, DestinationIP), Peer=SourceIP)",
+    "q_CairnCampaignInfrastructure_1": ",\n    (DnsEvents | where Name has_any (CairnDomains) | project TimeGenerated, Source=\"DnsEvents\", Indicator=Name, Peer=ClientIP)",
+    "q_CairnCampaignInfrastructure_2": ",\n    ",
+    "q_CairnCampaignInfrastructure_3": "(DeviceNetworkEvents | where RemoteIP in (CairnIPs) or RemoteUrl has_any (CairnDomains)\n        | project TimeGenerated, Source=\"DeviceNetworkEvents\", Indicator=coalesce(RemoteUrl, RemoteIP), Peer=DeviceName),\n    ",
+    "q_CairnCampaignInfrastructure_4": "(SigninLogs | where IPAddress in (CairnIPs) | project TimeGenerated, Source=\"SigninLogs\", Indicator=IPAddress, Peer=UserPrincipalName)\n| summarize Events=count(), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated) by Source, Indicator, Peer\n",
+    "n_CairnCampaignInfrastructure": "Traffic to or from published Cairn campaign infrastructure",
+    "q_CairnHostArtifacts_0": "union isfuzzy=true\n    (DeviceProcessEvents\n        | where ProcessCommandLine has_any (\"cairn serve\", \"cairn dispatch\", \"cairn-dispatch-\", \"cairn-worker-container\")\n            or ProcessCommandLine contains \"/tmp/cairn-pi/\" or ProcessCommandLine contains \"/tmp/cairn-prompts/\"\n        | project TimeGenerated, DeviceName, Detail=ProcessCommandLine, Kind=\"process\"),\n    ",
+    "q_CairnHostArtifacts_1": "(DeviceFileEvents\n        | where FolderPath contains \"/tmp/cairn-prompts/\" or FolderPath contains \"/tmp/cairn-pi/\" or FolderPath contains \"/skills/tsec-actions/\"\n        | project TimeGenerated, DeviceName, Detail=FolderPath, Kind=\"file\")\n| summarize Events=count(), Details=make_set(Detail, 10), Kinds=make_set(Kind), FirstSeen=min(TimeGenerated) by DeviceName\n",
+    "n_CairnHostArtifacts": "Cairn dispatcher, server or worker artifacts on a host",
+    "q_CyberstrikeaiImplantPersistence_0": "union isfuzzy=true\n    (DeviceProcessEvents\n        | where (ProcessCommandLine contains @\"CurrentVersion\\Run\" and ProcessCommandLine matches regex @'(?i)/v\\s+\"?SystemUpdate\\b')\n            or (ProcessCommandLine has \"schtasks\" and ProcessCommandLine matches regex @'(?i)/tn\\s+\"?\\\\?SystemUpdate\\b')\n            or (ProcessCommandLine contains \"@reboot\" and ProcessCommandLine contains \"sort -u | crontab -\")\n        | project TimeGenerated, DeviceName, AccountName, Detail=ProcessCommandLine)",
+    "q_CyberstrikeaiImplantPersistence_1": ",\n    (DeviceRegistryEvents\n        | where RegistryKey endswith @\"\\CurrentVersion\\Run\" and RegistryValueName =~ \"SystemUpdate\"\n        | project TimeGenerated, DeviceName, AccountName=InitiatingProcessAccountName, Detail=RegistryValueData)",
+    "q_CyberstrikeaiImplantPersistence_2": ",\n    ",
+    "q_CyberstrikeaiImplantPersistence_3": "(DeviceFileEvents\n        | where FileName =~ \"com.apple.systemupdate.plist\" and FolderPath has \"/Library/LaunchAgents/\"\n        | project TimeGenerated, DeviceName, AccountName=InitiatingProcessAccountName, Detail=FolderPath)\n| summarize Events=count(), FirstSeen=min(TimeGenerated), Details=make_set(substring(Detail, 0, 300), 10) by DeviceName, AccountName\n",
+    "n_CyberstrikeaiImplantPersistence": "CyberStrikeAI implant persistence",
+    "q_CyberstrikeaiWebshellManagerOrOsProbe_0": "union isfuzzy=true\n    (CommonSecurityLog | where RequestClientApplication has \"CyberStrikeAI\" or RequestURL contains \"OSPROBE_\"\n        | project TimeGenerated, Host=DestinationHostName, Src=SourceIP, Detail=strcat(RequestClientApplication, \" \", RequestURL))",
+    "q_CyberstrikeaiWebshellManagerOrOsProbe_1": ",\n    (W3CIISLog | extend UA=replace_string(csUserAgent, \"+\", \" \") | where UA has \"CyberStrikeAI\" or csUriQuery contains \"OSPROBE_\"\n        | project TimeGenerated, Host=Computer, Src=cIP, Detail=strcat(UA, \" \", csUriStem))",
+    "q_CyberstrikeaiWebshellManagerOrOsProbe_2": ",\n    ",
+    "q_CyberstrikeaiWebshellManagerOrOsProbe_3": "(DeviceProcessEvents | where ProcessCommandLine contains \"OSPROBE_\"\n        | project TimeGenerated, Host=DeviceName, Src=\"\", Detail=strcat(InitiatingProcessFileName, \" -> \", ProcessCommandLine))\n| summarize Events=count(), FirstSeen=min(TimeGenerated), Samples=make_set(Detail, 10) by Host, Src\n",
+    "n_CyberstrikeaiWebshellManagerOrOsProbe": "CyberStrikeAI webshell manager or OS probe",
+    "q_CarbonatoDockerApiHostEscape_0": "union isfuzzy=true\n    (DeviceProcessEvents\n        | where (ProcessCommandLine contains \"nsenter\" and ProcessCommandLine matches regex @\"-t\\s+1\\s\" and ProcessCommandLine contains \"-m\"\n          and ProcessCommandLine has_any (\"curl\", \"wget\", \"crontab\", \"chattr\", \"authorized_keys\", \"systemctl\", \"rc.local\", \".hermes\"))\n            or ProcessCommandLine matches regex @\"netns-probe|net-setup|system/resolved|docker-network-monitor|/opt/gh0st/|CARBONATO_API_KEY\"\n        | project TimeGenerated, DeviceName, Detail=ProcessCommandLine),\n    ",
+    "q_CarbonatoDockerApiHostEscape_1": "(DeviceFileEvents\n        | where FolderPath in~ (\"/usr/local/bin/.docker-network-monitor\", \"/usr/sbin/systemd-logind\") or FolderPath startswith \"/opt/gh0st/\"\n            or FolderPath startswith \"/root/.hermes/loot/\"\n        | project TimeGenerated, DeviceName, Detail=strcat(FolderPath, \" by \", InitiatingProcessCommandLine))\n| summarize Events=count(), FirstSeen=min(TimeGenerated), Details=make_set(substring(Detail, 0, 300), 10) by DeviceName\n",
+    "n_CarbonatoDockerApiHostEscape": "Carbonato Docker worm host escape or persistence",
+    "q_HermesYoloJailbreakOrAttackPersona_0": "let HermesProc = @\"(^|[/\\\\\\s])hermes(\\.exe)?(\\s|$)|hermes_cli|run_agent\\.py|/\\.hermes/|hermes-agent\";\nunion isfuzzy=true\n    (DeviceProcessEvents\n        | where (ProcessCommandLine matches regex HermesProc and (ProcessCommandLine contains \"--yolo\" or ProcessCommandLine contains \"HERMES_YOLO_MODE\" or ProcessCommandLine contains \"approvals.mode\"))\n            or ProcessCommandLine matches regex @\"(load_godmode|auto_jailbreak|parseltongue|godmode_race)\\.py\"\n        | project TimeGenerated, DeviceName, AccountName, Detail=ProcessCommandLine),\n    ",
+    "q_HermesYoloJailbreakOrAttackPersona_1": "(DeviceFileEvents\n        | where FolderPath matches regex @\"[/\\\\]\\.hermes[/\\\\]\"\n        | where FileName =~ \"prefill.json\" or FolderPath matches regex @\"[/\\\\]\\.hermes[/\\\\](loot|skills[/\\\\]security[/\\\\]godmode)[/\\\\]\"\n            or (FileName =~ \"SOUL.md\" and ActionType == \"FileModified\")\n        | project TimeGenerated, DeviceName, AccountName=InitiatingProcessAccountName, Detail=strcat(FolderPath, \" by \", InitiatingProcessFileName))\n| summarize Events=count(), FirstSeen=min(TimeGenerated), Details=make_set(substring(Detail, 0, 300), 10) by DeviceName, AccountName\n",
+    "n_HermesYoloJailbreakOrAttackPersona": "Hermes Agent set up for attack (approvals off, jailbreak skill or attack persona)",
+    "q_HexstrikeServerOnHost_0": "DeviceProcessEvents\n| where ProcessCommandLine has_any (\"hexstrike_server.py\", \"hexstrike_mcp.py\") or InitiatingProcessCommandLine has \"hexstrike_server.py\"\n| summarize Events=count(), Commands=make_set(substring(ProcessCommandLine, 0, 200), 15), FirstSeen=min(TimeGenerated) by DeviceName, AccountName\n",
+    "n_HexstrikeServerOnHost": "HexStrike tool server or MCP client on a host",
+    "q_HexstrikeUserAgentOrXssProbe_0": "let UAs = dynamic([\"HexStrike-HTTP-Framework/\", \"HexStrike-BrowserAgent/\", \"Mozilla/5.0 (Compatible Exploit)\"]);\nunion isfuzzy=true\n    (CommonSecurityLog | where RequestClientApplication has_any (UAs) or RequestURL contains \"hexstrikeXSSTest123\"\n        | project TimeGenerated, Src=SourceIP, Target=DestinationHostName, UA=RequestClientApplication, Detail=RequestURL)",
+    "q_HexstrikeUserAgentOrXssProbe_1": ",\n    (W3CIISLog | extend UA=replace_string(csUserAgent, \"+\", \" \") | where UA has_any (UAs) or csUriQuery contains \"hexstrikeXSSTest123\"\n        | project TimeGenerated, Src=cIP, Target=csHost, UA, Detail=csUriStem)",
+    "q_HexstrikeUserAgentOrXssProbe_2": ",\n    ",
+    "q_HexstrikeUserAgentOrXssProbe_3": "(SigninLogs | where UserAgent has_any (UAs) | project TimeGenerated, Src=IPAddress, Target=AppDisplayName, UA=UserAgent, Detail=UserPrincipalName)",
+    "q_HexstrikeUserAgentOrXssProbe_4": ",\n    (AWSCloudTrail | where UserAgent has_any (UAs) | project TimeGenerated, Src=SourceIpAddress, Target=EventSource, UA=UserAgent, Detail=EventName)",
+    "q_HexstrikeUserAgentOrXssProbe_5": "\n| summarize Events=count(), FirstSeen=min(TimeGenerated), Samples=make_set(Detail, 10) by Src, Target, UA\n",
+    "n_HexstrikeUserAgentOrXssProbe": "HexStrike user agent or cross-site scripting probe",
+    "q_PentagiAgentCommandWrapper_0": "DeviceProcessEvents\n| where (ProcessCommandLine contains \"/proc/self/oom_score_adj\" and ProcessCommandLine contains \"exec sh -c\")\n    or ProcessCommandLine has_any (\"pentagi-terminal-\", \"vxcontrol/kali-linux\", \"vxcontrol/pentagi\")\n| summarize Events=count(), Commands=make_set(substring(ProcessCommandLine, 0, 300), 10), FirstSeen=min(TimeGenerated) by DeviceName, DeviceId\n",
+    "n_PentagiAgentCommandWrapper": "PentAGI agent command wrapper on a host",
+    "q_PentagiUpdateCheckFromYourNetwork_0": "union isfuzzy=true\n    (DeviceNetworkEvents | where RemoteUrl has \"update.pentagi.com\" | project TimeGenerated, Host=DeviceName, Detail=RemoteUrl)",
+    "q_PentagiUpdateCheckFromYourNetwork_1": ",\n    (DnsEvents | where Name has \"update.pentagi.com\" | project TimeGenerated, Host=ClientIP, Detail=Name)",
+    "q_PentagiUpdateCheckFromYourNetwork_2": ",\n    ",
+    "q_PentagiUpdateCheckFromYourNetwork_3": "(CommonSecurityLog | where DestinationHostName has \"update.pentagi.com\" or RequestURL contains \"update.pentagi.com\" | project TimeGenerated, Host=SourceIP, Detail=RequestURL)\n| summarize Calls=count(), FirstSeen=min(TimeGenerated), LastSeen=max(TimeGenerated) by Host\n",
+    "n_PentagiUpdateCheckFromYourNetwork": "PentAGI update check from your network",
+    "q_StrixOnHostOrTelemetry_0": "union isfuzzy=true\n    (DeviceProcessEvents\n        | where (ProcessCommandLine matches regex @\"(^|[/\\\\\\s])strix(\\.exe)?\\s\" and ProcessCommandLine matches regex @\"\\s(--target|-t|--target-list|--scan-mode|--resume)[\\s=]\")\n            or ProcessCommandLine matches regex @\"((pip|pip3|pipx)\\s+install|uv\\s+(tool\\s+install|tool\\s+run|pip\\s+install)|uvx)\\s(.*\\s)?[\"\"']?strix-agent\" or ProcessCommandLine contains \"usestrix/strix-sandbox\"\n            or (ProcessCommandLine contains \"caido-cli\" and ProcessCommandLine contains \"--allow-guests\")\n        | project TimeGenerated, DeviceName, AccountName, Detail=ProcessCommandLine),\n    ",
+    "q_StrixOnHostOrTelemetry_1": "(DeviceNetworkEvents\n        | where RemoteUrl has \"strix.gateway.scarf.sh\"\n        | project TimeGenerated, DeviceName, AccountName=InitiatingProcessAccountName, Detail=strcat(RemoteUrl, \" \", InitiatingProcessCommandLine))\n| summarize Events=count(), FirstSeen=min(TimeGenerated), Details=make_set(substring(Detail, 0, 300), 10) by DeviceName, AccountName\n",
+    "n_StrixOnHostOrTelemetry": "Strix AI pentest agent on a host or reporting from your network"
+  },
+  "resources": [
+    {
+      "condition": "[parameters('deployCodingAgentBypassModeSpawnsAttackTools')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "d26760e9-6ec3-5eec-830b-5a20b884c956",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_CodingAgentBypassModeSpawnsAttackTools'))]",
+        "description": "A scanner, a Kerberos or SMB attack tool or an exploit kit started under an AI agent CLI: Claude Code (through its\nshell-snapshots shell or its Windows shell launcher), Qwen Code, Kimi CLI, Codex, opencode, Hermes or Cairn's workers.\nTools written in Python, Ruby or Perl (sqlmap, NetExec, wpscan, nikto) run as their interpreter and are found by the\nscript in the command line.\nThe agent is found from the process tree or its command line, not from an auto-approve flag: staff use those flags\ntoo, and an agent can run an attack tool without one. Tools are read from the last hour, agent processes from the\nlast day. Whatever model is behind it, this is agentic AI running an attack tool: check who ran it and the target.\nAgentic attack detections by ThreatDefence (cross-framework behavior): https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (coding-agent-bypass-mode-spawns-attack-tools.yaml).",
+        "severity": "Medium",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "P1D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Execution",
+          "Discovery",
+          "CredentialAccess"
+        ],
+        "techniques": [
+          "T1046",
+          "T1059",
+          "T1110"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[variables('q_CodingAgentBypassModeSpawnsAttackTools_0')]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployConfigBackupFileServed')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "19a1ebf3-be34-5d6b-b018-b28b5c5d2880",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_ConfigBackupFileServed'))]",
+        "description": "An internet address received a 200 or 206 for a source-control, environment or backup file (.git/HEAD, .env,\nbackup.zip, database dumps) while requesting several such paths. JPCERT/CC lists configuration and backup file theft in\nCase E (Cairn, CyberStrikeAI and ARTEX), and the AI agents Scutum observed swept these paths across hundreds of folders.\nAgentic attack detections by ThreatDefence (cross-framework behavior, first written for Cairn): https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (config-backup-file-served.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Collection",
+          "CredentialAccess"
+        ],
+        "techniques": [
+          "T1213",
+          "T1552"
+        ],
+        "subTechniques": [
+          "T1552.001"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[variables('q_ConfigBackupFileServed_0')]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployArtexAgentShellOnHost')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "7638a76d-d1fc-59e0-b917-31c87e9421a1",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_ArtexAgentShellOnHost'))]",
+        "description": "A process carried a marker that only the ARTEX binary creates: its \"bash\" shim in a temporary artex-exec- folder\n(server/execpriv.go, server/execpriv_unix.go:539-575), the MCP launcher argument \"__artex-exec-drop\", or the recording\nproxy credential \"artex-pace:artex-pace\" that ARTEX puts in every agent shell's HTTP_PROXY (egress/pace.go:20).\nSomeone is running ARTEX on this host: an authorized tester, an insider or an intruder staging from your network.\nAgentic attack detections by ThreatDefence (ARTEX): https://threatdefence.com/article/artex-agentic-attack-framework-detection-hunting\n\nSource: ThreatDefence/artex-detections (artex-agent-shell-on-host.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Execution",
+          "Discovery"
+        ],
+        "techniques": [
+          "T1046",
+          "T1059"
+        ],
+        "subTechniques": [
+          "T1059.004"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[variables('q_ArtexAgentShellOnHost_0')]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployArtexCloudwatchSecretSearch')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "786b38a9-a817-5f5b-993c-8b6a3d320de0",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_ArtexCloudwatchSecretSearch'))]",
+        "description": "FilterLogEvents with a filter pattern for passwords or access keys, as Datadog observed with a stolen key in ARTEX activity.\nAgentic attack detections by ThreatDefence (ARTEX): https://threatdefence.com/article/artex-agentic-attack-framework-detection-hunting\n\nSource: ThreatDefence/artex-detections (artex-cloudwatch-secret-search.yaml).",
+        "severity": "Medium",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "techniques": [
+          "T1552"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[variables('q_ArtexCloudwatchSecretSearch_0')]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployArtexEc2DryrunBurst')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "df5b6ef7-3f87-5a5b-b617-f9262eed71b5",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_ArtexEc2DryrunBurst'))]",
+        "description": "Ten or more EC2 calls with the DryRun flag from one identity in five minutes, the capability check ARTEX agents run with a stolen AWS key.\nAgentic attack detections by ThreatDefence (ARTEX): https://threatdefence.com/article/artex-agentic-attack-framework-detection-hunting\n\nSource: ThreatDefence/artex-detections (artex-ec2-dryrun-burst.yaml).",
+        "severity": "Medium",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Discovery"
+        ],
+        "techniques": [
+          "T1580"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[variables('q_ArtexEc2DryrunBurst_0')]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployArtexFixedRhythmPasswordSpray')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "c7a5507a-9966-53a5-836f-5c339352fb65",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_ArtexFixedRhythmPasswordSpray'))]",
+        "description": "One source failed sign-ins for many users with a median gap of two seconds or less, the rhythm Microsoft observed in Storm-0940 ARTEX sprays.\nAgentic attack detections by ThreatDefence (ARTEX): https://threatdefence.com/article/artex-agentic-attack-framework-detection-hunting\n\nSource: ThreatDefence/artex-detections (artex-fixed-rhythm-password-spray.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT2H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "techniques": [
+          "T1110"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_ArtexFixedRhythmPasswordSpray_0'), if(parameters('sourceAADNonInteractiveUserSignInLogs'), variables('q_ArtexFixedRhythmPasswordSpray_1'), ''), variables('q_ArtexFixedRhythmPasswordSpray_2'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployArtexNormaOrUpdateCheckUserAgent')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "7ccb8093-94fc-558b-8b2a-e1a2dff7b1b4",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_ArtexNormaOrUpdateCheckUserAgent'))]",
+        "description": "A sign-in, Graph call or web request carried a user agent hard-coded in the ARTEX source or its agent library:\n\"norma/0.4\" from the WebFetch tool (BaaRai/Norma v0.4.11, tool/webfetch.go:236) or \"artex-update-check\" from the\nconsole's update check (server/update_check.go:69). A real norma client only sends GET and never fetches static assets,\nso web rows that break that pattern are dropped. Other agents built on norma share its user agent: treat a match as a lead.\nAgentic attack detections by ThreatDefence (ARTEX): https://threatdefence.com/article/artex-agentic-attack-framework-detection-hunting\n\nSource: ThreatDefence/artex-detections (artex-norma-or-update-check-user-agent.yaml).",
+        "severity": "Medium",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Reconnaissance",
+          "Discovery"
+        ],
+        "techniques": [
+          "T1592",
+          "T1595"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_ArtexNormaOrUpdateCheckUserAgent_0'), if(parameters('sourceAADNonInteractiveUserSignInLogs'), variables('q_ArtexNormaOrUpdateCheckUserAgent_1'), ''), if(parameters('sourceMicrosoftGraphActivityLogs'), variables('q_ArtexNormaOrUpdateCheckUserAgent_2'), ''), variables('q_ArtexNormaOrUpdateCheckUserAgent_3'), variables('q_ArtexNormaOrUpdateCheckUserAgent_4'), if(parameters('sourceW3CIISLog'), variables('q_ArtexNormaOrUpdateCheckUserAgent_5'), ''), variables('q_ArtexNormaOrUpdateCheckUserAgent_6'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployArtexServicePrincipalSelfRoleAssignment')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "8c6d799b-6820-582b-847e-357c9c56b749",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_ArtexServicePrincipalSelfRoleAssignment'))]",
+        "description": "A service principal added a directory role or app role assignment to itself, as compromised applications did in the Storm-0940 ARTEX campaign.\nAgentic attack detections by ThreatDefence (ARTEX): https://threatdefence.com/article/artex-agentic-attack-framework-detection-hunting\n\nSource: ThreatDefence/artex-detections (artex-service-principal-self-role-assignment.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "PrivilegeEscalation",
+          "Persistence"
+        ],
+        "techniques": [
+          "T1098"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[variables('q_ArtexServicePrincipalSelfRoleAssignment_0')]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployArtexUserAgentAnySource')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "255cc5dc-0859-568e-bf73-22a5cf2b5c26",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_ArtexUserAgentAnySource'))]",
+        "description": "A sign-in, cloud API call or web request carried a user agent that names the ARTEX framework or its renamed builds.\nAgentic attack detections by ThreatDefence (ARTEX): https://threatdefence.com/article/artex-agentic-attack-framework-detection-hunting\n\nSource: ThreatDefence/artex-detections (artex-user-agent-any-source.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Reconnaissance",
+          "InitialAccess"
+        ],
+        "techniques": [
+          "T1078",
+          "T1595"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_ArtexUserAgentAnySource_0'), if(parameters('sourceAADNonInteractiveUserSignInLogs'), variables('q_ArtexUserAgentAnySource_1'), ''), if(parameters('sourceAWSCloudTrail'), variables('q_ArtexUserAgentAnySource_2'), ''), variables('q_ArtexUserAgentAnySource_3'), variables('q_ArtexUserAgentAnySource_4'), if(parameters('sourceMicrosoftGraphActivityLogs'), variables('q_ArtexUserAgentAnySource_5'), ''), variables('q_ArtexUserAgentAnySource_6'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployCairnCampaignInfrastructure')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "0e6b86db-26d7-5ad4-8d59-b592d91b7619",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_CairnCampaignInfrastructure'))]",
+        "description": "A connection, DNS query, sign-in or web request involved an address or domain published for Cairn operations:\nJPCERT/CC Case E, NorForge AIA0002 staging servers, or the staging, C2 and skimmer hosts Gambit Security recovered from\nan operator using Hermes, Strix and Cairn. Addresses are reassigned: check the review_by date in iocs/indicators.csv.\nAgentic attack detections by ThreatDefence (Cairn): https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (cairn-campaign-infrastructure.yaml).",
+        "severity": "Medium",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "CommandAndControl",
+          "Exfiltration",
+          "InitialAccess"
+        ],
+        "techniques": [
+          "T1041",
+          "T1071",
+          "T1190"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_CairnCampaignInfrastructure_0'), if(parameters('sourceDnsEvents'), variables('q_CairnCampaignInfrastructure_1'), ''), variables('q_CairnCampaignInfrastructure_2'), variables('q_CairnCampaignInfrastructure_3'), variables('q_CairnCampaignInfrastructure_4'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployCairnHostArtifacts')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "269897d6-6c7a-5626-87ed-16e65bcda992",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_CairnHostArtifacts'))]",
+        "description": "A process or file carried a marker only Cairn creates: cairn serve / cairn dispatch, a cairn-dispatch-<project>\nworker container, the /tmp/cairn-prompts/ task snapshots, the /tmp/cairn-pi/ provider keys or the tsec-actions skill\ncopied from the Tencent competition setup.\nAgentic attack detections by ThreatDefence (Cairn): https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (cairn-host-artifacts.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Execution",
+          "CommandAndControl"
+        ],
+        "techniques": [
+          "T1059",
+          "T1219"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_CairnHostArtifacts_0'), variables('q_CairnHostArtifacts_1'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployCyberstrikeaiImplantPersistence')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "89f1eee2-554b-5edc-a383-2ea50cc40b61",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_CyberstrikeaiImplantPersistence'))]",
+        "description": "A host created the persistence the CyberStrikeAI implant uses: a Run value or scheduled task named SystemUpdate\n(schtasks /sc onlogon /rl highest), an @reboot crontab entry piped through sort -u, \nor a com.apple.systemupdate LaunchAgent. Kaspersky saw the SystemUpdate task and Run value in real attacks.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (cyberstrikeai-implant-persistence.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Persistence"
+        ],
+        "techniques": [
+          "T1053",
+          "T1543",
+          "T1546",
+          "T1547"
+        ],
+        "subTechniques": [
+          "T1053.003",
+          "T1053.005",
+          "T1543.001",
+          "T1546.004",
+          "T1547.001"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_CyberstrikeaiImplantPersistence_0'), if(parameters('sourceDeviceRegistryEvents'), variables('q_CyberstrikeaiImplantPersistence_1'), ''), variables('q_CyberstrikeaiImplantPersistence_2'), variables('q_CyberstrikeaiImplantPersistence_3'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployCyberstrikeaiWebshellManagerOrOsProbe')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "2a6b2b06-1887-55c5-9950-9ca4397e33fb",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_CyberstrikeaiWebshellManagerOrOsProbe'))]",
+        "description": "A web or proxy request carried a user agent hard-coded in CyberStrikeAI (CyberStrikeAI-WebShell/1.0 from its webshell\nmanager, or CyberStrikeAI/<version> from the console), or a process ran its webshell OS probe \"echo :OSPROBE_%OS%:END\".\nThe probe runs as a child of the web server once a webshell is in place, so treat a hit as a compromised server.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (cyberstrikeai-webshell-manager-or-os-probe.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Persistence",
+          "Execution"
+        ],
+        "techniques": [
+          "T1059",
+          "T1505"
+        ],
+        "subTechniques": [
+          "T1505.003"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_CyberstrikeaiWebshellManagerOrOsProbe_0'), if(parameters('sourceW3CIISLog'), variables('q_CyberstrikeaiWebshellManagerOrOsProbe_1'), ''), variables('q_CyberstrikeaiWebshellManagerOrOsProbe_2'), variables('q_CyberstrikeaiWebshellManagerOrOsProbe_3'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployCarbonatoDockerApiHostEscape')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "1b9d625d-b91a-5df1-b7b6-9a320eb0541a",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_CarbonatoDockerApiHostEscape'))]",
+        "description": "A host ran Carbonato's Docker escape (nsenter -t 1 into the host from a privileged container), its container names\nnetns-probe or net-setup, its image system/resolved, or its persistence files (/opt/gh0st/, /usr/local/bin/.docker-network-monitor,\na miner at /usr/sbin/systemd-logind, /root/.hermes/loot/). Carbonato installs Hermes Agent with a GH0ST persona and runs\nit from Telegram.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (carbonato-docker-api-host-escape.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "PrivilegeEscalation",
+          "Persistence",
+          "DefenseEvasion"
+        ],
+        "techniques": [
+          "T1036",
+          "T1053",
+          "T1611"
+        ],
+        "subTechniques": [
+          "T1036.005",
+          "T1053.003"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_CarbonatoDockerApiHostEscape_0'), variables('q_CarbonatoDockerApiHostEscape_1'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployHermesYoloJailbreakOrAttackPersona')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "e8d0c6b1-29ca-56bd-8e14-747f86b785f3",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_HermesYoloJailbreakOrAttackPersona'))]",
+        "description": "Hermes Agent ran with approvals off (--yolo, HERMES_YOLO_MODE, approvals.mode), its godmode jailbreak skill ran, or files\nthat attackers use were written under .hermes: SOUL.md, prefill.json, the godmode skill folder, or a loot folder.\nHermes is legitimate; these changes are how Unit 42's knaithe/KnYuan, the Gambit retail operator, the Carbonato botnet\nand the operator inside Thailand's Ministry of Finance turned it into an attack console.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (hermes-yolo-jailbreak-or-attack-persona.yaml).",
+        "severity": "Medium",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Execution",
+          "DefenseEvasion"
+        ],
+        "techniques": [
+          "T1059",
+          "T1562"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_HermesYoloJailbreakOrAttackPersona_0'), variables('q_HermesYoloJailbreakOrAttackPersona_1'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployHexstrikeServerOnHost')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "6dd1c39c-6e49-533c-a4ff-bf308db63752",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_HexstrikeServerOnHost'))]",
+        "description": "A process ran hexstrike_server.py or hexstrike_mcp.py, or a security tool was started by hexstrike_server.py. HexStrike\nexposes about 150 tools, and an unauthenticated /api/command shell, on 0.0.0.0:8888.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (hexstrike-server-on-host.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Execution",
+          "Discovery"
+        ],
+        "techniques": [
+          "T1046",
+          "T1059"
+        ],
+        "subTechniques": [
+          "T1059.004"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[variables('q_HexstrikeServerOnHost_0')]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployHexstrikeUserAgentOrXssProbe')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "82566f52-71a1-5349-8b36-53fa03bf5c67",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_HexstrikeUserAgentOrXssProbe'))]",
+        "description": "A web request, proxy request, sign-in or AWS call carried a user agent hard-coded in HexStrike (HexStrike-HTTP-Framework/,\nHexStrike-BrowserAgent/, or Mozilla/5.0 (Compatible Exploit) from its generated exploits), or the <hexstrikeXSSTest123>\nprobe its browser agent submits into forms.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (hexstrike-user-agent-or-xss-probe.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Reconnaissance",
+          "InitialAccess"
+        ],
+        "techniques": [
+          "T1190",
+          "T1595"
+        ],
+        "subTechniques": [
+          "T1595.002"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_HexstrikeUserAgentOrXssProbe_0'), if(parameters('sourceW3CIISLog'), variables('q_HexstrikeUserAgentOrXssProbe_1'), ''), variables('q_HexstrikeUserAgentOrXssProbe_2'), variables('q_HexstrikeUserAgentOrXssProbe_3'), if(parameters('sourceAWSCloudTrail'), variables('q_HexstrikeUserAgentOrXssProbe_4'), ''), variables('q_HexstrikeUserAgentOrXssProbe_5'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployPentagiAgentCommandWrapper')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "18f326a6-e598-521d-98db-d54f15a8725a",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_PentagiAgentCommandWrapper'))]",
+        "description": "A process ran PentAGI's agent command wrapper (trap \"\" HUP, raise /proc/self/oom_score_adj by one, exec sh -c \"$0\"),\nor referenced a pentagi-terminal-<flow> worker container or a vxcontrol image. PentAGI runs every agent command this way\n(backend/pkg/docker/flow_commands.go), so this host is running PentAGI engagements.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (pentagi-agent-command-wrapper.yaml).",
+        "severity": "High",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Execution",
+          "Discovery"
+        ],
+        "techniques": [
+          "T1046",
+          "T1059"
+        ],
+        "subTechniques": [
+          "T1059.004"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[variables('q_PentagiAgentCommandWrapper_0')]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployPentagiUpdateCheckFromYourNetwork')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "1fcac6d8-f3fb-59dc-9ba3-c7a3f09d4de8",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_PentagiUpdateCheckFromYourNetwork'))]",
+        "description": "A host called update.pentagi.com, which every PentAGI installation does every three hours by default\n(backend/pkg/server/update/update.go). PentAGI is running on that host or behind it: confirm it is an approved test.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (pentagi-update-check-from-your-network.yaml).",
+        "severity": "Medium",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "CommandAndControl",
+          "Discovery"
+        ],
+        "techniques": [
+          "T1046",
+          "T1071"
+        ],
+        "subTechniques": [
+          "T1071.001"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_PentagiUpdateCheckFromYourNetwork_0'), if(parameters('sourceDnsEvents'), variables('q_PentagiUpdateCheckFromYourNetwork_1'), ''), variables('q_PentagiUpdateCheckFromYourNetwork_2'), variables('q_PentagiUpdateCheckFromYourNetwork_3'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    },
+    {
+      "condition": "[parameters('deployStrixOnHostOrTelemetry')]",
+      "type": "Microsoft.SecurityInsights/alertRules",
+      "apiVersion": "2024-03-01",
+      "kind": "Scheduled",
+      "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', parameters('workspaceName'))]",
+      "name": "cab43264-9ff4-569e-baab-23ecfba867d8",
+      "properties": {
+        "displayName": "[concat(parameters('rulePrefix'), variables('n_StrixOnHostOrTelemetry'))]",
+        "description": "A host ran the Strix CLI (strix --target, --scan-mode), installed strix-agent, started the\nghcr.io/usestrix/strix-sandbox container or its Caido proxy, or sent Strix telemetry to strix.gateway.scarf.sh. Strix\nfound the vulnerabilities in the retail card-theft campaign Gambit Security reported, before Cairn exploited them.\nAgentic attack detections by ThreatDefence: https://github.com/ThreatDefence/agentic-attack-detections\n\nSource: ThreatDefence/artex-detections (strix-on-host-or-telemetry.yaml).",
+        "severity": "Medium",
+        "queryFrequency": "PT1H",
+        "queryPeriod": "PT1H",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionEnabled": false,
+        "suppressionDuration": "PT5H",
+        "tactics": [
+          "Reconnaissance",
+          "Execution"
+        ],
+        "techniques": [
+          "T1059",
+          "T1595"
+        ],
+        "subTechniques": [
+          "T1059.006",
+          "T1595.002"
+        ],
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "query": "[concat(variables('q_StrixOnHostOrTelemetry_0'), variables('q_StrixOnHostOrTelemetry_1'))]",
+        "enabled": "[parameters('rulesEnabled')]"
+      }
+    }
+  ]
+}
